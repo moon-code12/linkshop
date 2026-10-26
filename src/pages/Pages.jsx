@@ -250,7 +250,7 @@ function ProductView({ store, productId }) {
           {!soldOut && (
             <>
               <div className="quantity"><button aria-label="Decrease quantity" onClick={() => setQty(Math.max(1, qty - 1))}>−</button><span>{qty}</span><button aria-label="Increase quantity" onClick={() => setQty(Math.min(product.stock, qty + 1))}>+</button></div>
-              <div className="detail-actions">
+              <div className="detail-actions sticky-cta">
                 <button className="btn btn-dark" onClick={() => addItem(product, store.slug, qty)}><ShoppingBag size={16}/> Add to bag</button>
                 <button className="btn btn-light" onClick={() => { addItem(product, store.slug, qty); nav(`/store/${store.slug}/checkout`); }}>Buy now</button>
               </div>
@@ -305,7 +305,7 @@ function CartView({ store }) {
             <p><span>Delivery</span><b>{fee === 0 ? 'Free' : naira(fee)}</b></p>
             {toFree > 0 && fee > 0 && <div className="free-ship"><div><span style={{ width: `${Math.min(100, (subtotal / store.freeDeliveryOver) * 100)}%` }}/></div><small>Add {naira(toFree)} more for free delivery</small></div>}
             <hr/><p className="grand"><b>Total</b><b>{naira(subtotal + fee)}</b></p>
-            <Link className="btn btn-dark wide" to={`/store/${store.slug}/checkout`}>Checkout <ArrowRight size={16}/></Link>
+            <Link className="btn btn-dark wide sticky-cta" to={`/store/${store.slug}/checkout`}>Checkout <ArrowRight size={16}/></Link>
           </aside>
         )}
       </div>
@@ -396,7 +396,7 @@ function CheckoutView({ store }) {
           {PAYMENT_MODE === 'test' && data.method !== 'cod' && <p className="test-banner"><Lock size={14}/> <span><b>Test payment mode.</b> No money is charged. Use card <code>4242 4242 4242 4242</code>, any future date and any CVV. A number ending in <code>0002</code> simulates a declined card.</span></p>}
 
           {error && <p className="error" role="alert">{error}</p>}
-          <button className="btn btn-dark wide" disabled={busy}>{busy ? 'Processing…' : data.method === 'card' ? `Pay ${naira(total + fee)}` : 'Place order'} {!busy && <ArrowRight size={16}/>}</button>
+          <button className="btn btn-dark wide sticky-cta" disabled={busy}>{busy ? 'Processing…' : data.method === 'card' ? `Pay ${naira(total + fee)}` : 'Place order'} {!busy && <ArrowRight size={16}/>}</button>
         </form>
 
         <aside className="summary">

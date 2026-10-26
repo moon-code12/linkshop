@@ -50,9 +50,9 @@ function AdminView() {
       <p className="eyebrow">PLATFORM OPERATIONS</p><h1><Shield size={26}/> Admin overview</h1>
       <div className="stats three"><div className="stat"><span>Stores</span><b>{data.stores.length}</b></div><div className="stat"><span>Orders</span><b>{data.orders.length}</b></div><div className="stat"><span>Gross merchandise value</span><b>{naira(gmv)}</b></div></div>
       <div className="panel"><h2>Stores</h2><div className="table-wrap"><table><thead><tr><th>STORE</th><th>LINK</th><th>ORDERS</th></tr></thead><tbody>
-        {data.stores.map(s => <tr key={s.id}><td><b>{s.name}</b></td><td><Link to={`/store/${s.slug}`}>/store/{s.slug}</Link></td><td>{data.orders.filter(o => o.storeId === s.id).length}</td></tr>)}</tbody></table></div></div>
+        {data.stores.map(s => <tr key={s.id}><td data-label="STORE"><b>{s.name}</b></td><td data-label="LINK"><Link to={`/store/${s.slug}`}>/store/{s.slug}</Link></td><td data-label="ORDERS">{data.orders.filter(o => o.storeId === s.id).length}</td></tr>)}</tbody></table></div></div>
       <div className="panel"><h2>Latest orders</h2><div className="table-wrap"><table><thead><tr><th>ORDER</th><th>STORE</th><th>TOTAL</th><th>STATUS</th></tr></thead><tbody>
-        {data.orders.slice(0, 20).map(o => <tr key={o.id}><td><b>{o.id.slice(0, 8).toUpperCase()}</b><small>{dateTimeText(o.createdAt)}</small></td><td>{o.storeName}</td><td>{naira(o.total)}</td><td><StatusBadge status={o.status}/></td></tr>)}</tbody></table></div></div>
+        {data.orders.slice(0, 20).map(o => <tr key={o.id}><td data-label="ORDER"><b>{o.id.slice(0, 8).toUpperCase()}</b><small>{dateTimeText(o.createdAt)}</small></td><td data-label="STORE">{o.storeName}</td><td data-label="TOTAL">{naira(o.total)}</td><td data-label="STATUS"><StatusBadge status={o.status}/></td></tr>)}</tbody></table></div></div>
     </div>
   );
 }

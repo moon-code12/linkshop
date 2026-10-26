@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { BarChart3, Boxes, ClipboardList, LayoutDashboard, LogOut, Package, Settings, ShoppingBag, Shield, User, Users } from 'lucide-react';
+import { BarChart3, Boxes, ClipboardList, LayoutDashboard, LogOut, Menu, Package, Settings, ShoppingBag, Shield, User, Users, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useCart } from '../context/CartContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
@@ -39,6 +39,10 @@ function AccountMenu() {
 
 export function Header() {
   const { count, storeSlug } = useCart();
+  const { user } = useAuth();
+  const [open, setOpen] = useState(false);
+  const { pathname } = useLocation();
+  useEffect(() => setOpen(false), [pathname]);
   return (
     <header className="header">
       <div className="container header-inner">
@@ -47,8 +51,10 @@ export function Header() {
         <div className="head-actions">
           <Link className="cart-link" to={storeSlug ? `/store/${storeSlug}/cart` : '/#stores'} aria-label={`Shopping bag, ${count} items`}><ShoppingBag size={19}/>{count > 0 && <span>{count}</span>}</Link>
           <AccountMenu/>
+          <button className="menu-btn" onClick={() => setOpen(!open)} aria-expanded={open} aria-label="Menu">{open ? <X size={20}/> : <Menu size={20}/>}</button>
         </div>
       </div>
+      {open && <nav className="mobile-nav"><Link to="/#stores">Explore stores</Link><Link to="/#how">How it works</Link><Link to="/signup?role=seller">Sell with LinkShop</Link>{!user && <Link to="/login">Log in</Link>}</nav>}
     </header>
   );
 }

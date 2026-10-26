@@ -62,11 +62,11 @@ function OrdersTable({ orders, onOpen }) {
     <div className="table-wrap"><table><thead><tr><th>ORDER</th><th>CUSTOMER</th><th>TOTAL</th><th>PAYMENT</th><th>STATUS</th></tr></thead>
       <tbody>{orders.map(o => (
         <tr key={o.id} className={onOpen ? 'click' : ''} onClick={() => onOpen?.(o)}>
-          <td><b>{o.id.slice(0, 8).toUpperCase()}</b><small>{dateTimeText(o.createdAt)}</small></td>
-          <td>{o.customer.name}<small>{o.items.length} item{o.items.length === 1 ? '' : 's'}</small></td>
-          <td>{naira(o.total)}</td>
-          <td><span className={`status ${o.payment?.status === 'paid' ? 'delivered' : 'pending'}`}>{o.payment?.status === 'paid' ? 'Paid' : o.payment?.method === 'cod' ? 'On delivery' : 'Awaiting'}</span></td>
-          <td><StatusBadge status={o.status}/></td>
+          <td data-label="ORDER"><b>{o.id.slice(0, 8).toUpperCase()}</b><small>{dateTimeText(o.createdAt)}</small></td>
+          <td data-label="CUSTOMER">{o.customer.name}<small>{o.items.length} item{o.items.length === 1 ? '' : 's'}</small></td>
+          <td data-label="TOTAL">{naira(o.total)}</td>
+          <td data-label="PAYMENT"><span className={`status ${o.payment?.status === 'paid' ? 'delivered' : 'pending'}`}>{o.payment?.status === 'paid' ? 'Paid' : o.payment?.method === 'cod' ? 'On delivery' : 'Awaiting'}</span></td>
+          <td data-label="STATUS"><StatusBadge status={o.status}/></td>
         </tr>))}</tbody></table></div>
   );
 }
@@ -290,7 +290,7 @@ export function Customers() {
       <Title title="Customers" desc="Everyone who has ordered from your store."/>
       <div className="panel">{list.length === 0 ? <EmptyState icon={Users} title="No customers yet" text="Customer records are created automatically from orders."/> : (
         <div className="table-wrap"><table><thead><tr><th>CUSTOMER</th><th>CONTACT</th><th>ORDERS</th><th>SPENT</th><th>LAST ORDER</th></tr></thead>
-          <tbody>{list.map(c => <tr key={c.key}><td><b>{c.name}</b>{c.orders > 1 && <small>Repeat customer</small>}</td><td>{c.email}<small>{c.phone}</small></td><td>{c.orders}</td><td>{naira(c.spent)}</td><td>{c.last.toLocaleDateString('en-NG', { day: 'numeric', month: 'short' })}</td></tr>)}</tbody></table></div>)}</div>
+          <tbody>{list.map(c => <tr key={c.key}><td data-label="CUSTOMER"><b>{c.name}</b>{c.orders > 1 && <small>Repeat customer</small>}</td><td data-label="CONTACT">{c.email}<small>{c.phone}</small></td><td data-label="ORDERS">{c.orders}</td><td data-label="SPENT">{naira(c.spent)}</td><td data-label="LAST ORDER">{c.last.toLocaleDateString('en-NG', { day: 'numeric', month: 'short' })}</td></tr>)}</tbody></table></div>)}</div>
     </div>
   );
 }
