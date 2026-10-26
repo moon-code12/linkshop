@@ -9,7 +9,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { useCart } from '../context/CartContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import { isFirebaseConfigured } from '../services/firebase.js';
-import { deliveryFor, getOrder, getProduct, getStoreBySlug, listProducts, listStores, quoteCart, saveOrder } from '../services/db.js';
+import { deliveryFor, getOrder, getProduct, getStoreBySlug, listHomeProducts, listProducts, listStores, quoteCart, saveOrder } from '../services/db.js';
 import { naira } from '../services/catalog.js';
 import { cardBrand, getGateway, PAYMENT_MODE } from '../services/payments.js';
 import ProductCard from '../components/ProductCard.jsx';
@@ -59,9 +59,10 @@ const HERO = [
 
 export function Home() {
   const [stores, setStores] = useState(null);
+  const [picks, setPicks] = useState([]);
   useEffect(() => {
     if (!isFirebaseConfigured) { setStores([]); return; }
-    listStores(9).then(setStores).catch(() => setStores([]));
+    listStores(9).then(list => { setStores(list); listHomeProducts(list).then(setPicks).catch(() => {}); }).catch(() => setStores([]));
   }, []);
   return (
     <>
@@ -101,6 +102,18 @@ export function Home() {
           )}
         </div>
       </section>
+
+      {picks.length > 0 && (
+        <section className="section featured-section">
+          <div className="container">
+            <p className="eyebrow">FRESH FROM THE STORES</p>
+            <h2>Featured products</h2>
+            <div className="products-grid four">{picks.map(p => (
+              <div key={`${p.storeSlug}-${p.id}`}><ProductCard product={p} slug={p.storeSlug}/><Link className="from-store" to={`/store/${p.storeSlug}`}>from {p.storeName}</Link></div>
+            ))}</div>
+          </div>
+        </section>
+      )}
 
       <section className="section tint" id="how">
         <div className="container">

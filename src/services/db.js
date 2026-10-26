@@ -3,7 +3,7 @@ import {
   serverTimestamp, setDoc, updateDoc, where, writeBatch,
 } from 'firebase/firestore';
 import { db } from './firebase.js';
-import { slugify, starterCatalogue } from './catalog.js';
+import { pickImage, slugify, starterCatalogue } from './catalog.js';
 
 export const ORDER_STATUSES = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
 export const DELIVERY_FEE_DEFAULT = 2500;
@@ -37,6 +37,17 @@ export async function getStoreByOwner(uid) {
 export async function listStores(max = 12) {
   const snap = await getDocs(query(collection(db, 'stores'), orderBy('createdAt', 'desc'), limit(max)));
   return snap.docs.map(withId);
+}
+// Featured products across stores for the homepage (falls back to any products if none are featured).
+export async function listHomeProducts(stores, max = 8) {
+  const perStore = await Promise.all(stores.slice(0, 6).map(async store => {
+    const snap = await getDocs(query(productsRef(store.id), limit(12)));
+    const all = snap.docs.map(d => ({ ...withId(d), storeSlug: store.slug, storeName: store.name }));
+    return [...all.filter(p => p.featured), ...all.filter(p => !p.featured)].filter(p => p.stock > 0 && p.image).slice(0, 4);
+  }));
+  const out = [];
+  for (let i = 0; out.length < max && perStore.some(l => l[i]); i++) perStore.forEach(l => { if (l[i] && out.length < max) out.push(l[i]); });
+  return out;
 }
 export async function isSlugAvailable(slug) {
   return !(await getDoc(doc(db, 'slugs', slug))).exists();
@@ -73,7 +84,8 @@ export async function getProduct(storeId, productId) {
   return snap.exists() ? withId(snap) : null;
 }
 const cleanProduct = p => ({
-  name: p.name.trim(), category: p.category.trim(), description: (p.description || '').trim(), image: (p.image || '').trim(),
+  name: p.name.trim(), category: p.category.trim(), description: (p.description || '').trim(),
+  ...(p.image && !p.autoImage ? { image: p.image.trim(), autoImage: false } : { image: pickImage(p.name, p.category), autoImage: true }),
   price: Math.max(0, Math.round(Number(p.price) || 0)), stock: Math.max(0, Math.round(Number(p.stock) || 0)), featured: Boolean(p.featured),
 });
 export async function saveProduct(storeId, product) {

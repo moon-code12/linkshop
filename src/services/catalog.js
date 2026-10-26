@@ -52,6 +52,36 @@ export const starterCatalogue = [
   { name: 'The Reader’s Bundle', category: 'Home & Living', price: 15500, stock: 19, image: img('1544947950-fa07a98d237f'), description: 'A curated bundle of three bestselling paperbacks for slow evenings.' },
 ];
 
+// Automatic product photos: sellers never add images. A photo is chosen from the product's name,
+// falling back to its category. Only verified image ids are used.
+const KEYWORD_IMAGES = [
+  [/hood|fleece/, ['1556821840-3a63f95609a7']], [/sweater|knit|jumper|cardigan/, ['1620799140408-edc6dcb6d633', '1551232864-3f0890e580d9']],
+  [/leather jacket|jacket|coat|blazer/, ['1551028719-00167b16eac5', '1591047139829-d91aecb6caea']], [/jean|denim|trouser|pant/, ['1542272604-787c3835535d']],
+  [/tee|t-shirt|tshirt|shirt|top|polo|blouse/, ['1521572163474-6864f9cf17ab', '1618354691373-d851c5c3a990', '1598033129183-c4f50c736f10']],
+  [/sandal|heel|slide|slipper/, ['1543163521-1bf539c55dd2']], [/sneaker|trainer|runner|shoe|boot|loafer|lace/, ['1542291026-7eec264c27ff', '1595950653106-6c9ebd614d3a', '1491553895911-0055eca6402d', '1549298916-b41d501d3772']],
+  [/backpack|rucksack/, ['1553062407-98eeb64c6a62']], [/handbag|purse|clutch|crossbody/, ['1584917865442-de89df76afd3', '1548036328-c9fa89d128fa']], [/tote|bag|pouch|wallet/, ['1590874103328-eac38a683ce7', '1606760227091-3dd870d97f1d']],
+  [/watch|wristwatch/, ['1524805444758-089113d48a6d', '1523275335684-37898b6baf30']], [/sunglass|glasses|shades/, ['1572635196237-14b3f281503f']],
+  [/smartwatch|fitness band/, ['1546868871-7041f2a55e12']], [/headphone|headset|earphone|earbud|speaker/, ['1505740420928-5e560c06d30e', '1583394838336-acd977736f90']],
+  [/laptop|computer|notebook pc/, ['1496181133206-80ce9b88a853']], [/phone|iphone|android|smartphone/, ['1511707171634-5f897ff02aa9']], [/camera|lens/, ['1526170375885-4d8ecf77b99f']],
+  [/perfume|fragrance|cologne|parfum|scent/, ['1585386959984-a4155224a1ad', '1541643600914-78b084683601', '1594035910387-fea47794261f']], [/makeup|lipstick|palette|foundation|mascara|cosmetic/, ['1596462502278-27bfdc403348', '1522335789203-aabd1fc54bc9']],
+  [/serum|cream|lotion|moistur|cleanser|toner|skin|face/, ['1556228453-efd6c1ff04f6', '1612817288484-6f916006741a', '1571781926291-c477ebfd024b']], [/soap|bath|body wash/, ['1608248543803-ba4f8c70ae0b', '1608571423902-eed4a5ad8108']],
+  [/sofa|couch/, ['1555041469-a586c61ea9bc']], [/chair|stool|seat/, ['1586023492125-27b2c045efd7', '1493663284031-b7e3aefcae8e']], [/mug|cup|plate|bowl|ceramic|stoneware/, ['1514228742587-6b1558fcca3d', '1517256064527-09c73fc73e38']],
+  [/bottle|flask|tumbler/, ['1602143407151-7111542de6e8']], [/book|novel|paperback/, ['1544947950-fa07a98d237f']],
+];
+const CATEGORY_IMAGES = {
+  clothing: ['1521572163474-6864f9cf17ab', '1556821840-3a63f95609a7', '1542272604-787c3835535d'], footwear: ['1542291026-7eec264c27ff', '1595950653106-6c9ebd614d3a'],
+  accessories: ['1524805444758-089113d48a6d', '1590874103328-eac38a683ce7', '1572635196237-14b3f281503f'], electronics: ['1505740420928-5e560c06d30e', '1496181133206-80ce9b88a853', '1511707171634-5f897ff02aa9'],
+  beauty: ['1556228453-efd6c1ff04f6', '1596462502278-27bfdc403348', '1585386959984-a4155224a1ad'], 'home & living': ['1586023492125-27b2c045efd7', '1514228742587-6b1558fcca3d', '1555041469-a586c61ea9bc'],
+};
+const GENERIC = ['1523381210434-271e8be1f52b', '1590874103328-eac38a683ce7', '1524805444758-089113d48a6d'];
+const hash = text => [...text].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
+export function pickImage(name = '', category = '') {
+  const text = String(name).toLowerCase();
+  const hit = KEYWORD_IMAGES.find(([re]) => re.test(text));
+  const pool = hit ? hit[1] : CATEGORY_IMAGES[String(category).toLowerCase()] || GENERIC;
+  return img(pool[hash(text) % pool.length]);
+}
+
 export const naira = amount =>
   new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 }).format(Number(amount) || 0);
 

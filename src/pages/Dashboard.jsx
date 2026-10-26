@@ -124,7 +124,6 @@ function ProductForm({ initial, onClose }) {
   const submit = async e => {
     e.preventDefault(); setBusy(true); setError('');
     try {
-      if (form.image && !/^https?:\/\//i.test(form.image)) throw new Error('Image must be a web address starting with https://');
       await saveProduct(store.id, form);
       await reload();
       toast(form.id ? 'Product updated' : 'Product added', 'success');
@@ -141,8 +140,8 @@ function ProductForm({ initial, onClose }) {
           <label>Price (₦)<input required type="number" min="0" step="1" value={form.price} onChange={set('price')}/></label>
           <label>Stock<input required type="number" min="0" step="1" value={form.stock} onChange={set('stock')}/></label>
         </div>
-        <label>Image link<input value={form.image} onChange={set('image')} placeholder="https://…"/></label>
-        {form.image && <ProductImage className="form-preview" src={form.image} alt="Preview"/>}
+        <p className="muted fine left">A matching photo is added automatically from the product name and category.</p>
+        {form.image && <ProductImage className="form-preview" src={form.image} alt="Current photo"/>}
         <label>Description<textarea rows="3" value={form.description} onChange={set('description')} maxLength="600"/></label>
         <label className="check"><input type="checkbox" checked={form.featured} onChange={set('featured')}/> Feature this product on my storefront</label>
         {error && <p className="error" role="alert">{error}</p>}
