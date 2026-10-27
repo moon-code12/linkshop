@@ -11,6 +11,7 @@ import { useToast } from '../context/ToastContext.jsx';
 import { isFirebaseConfigured } from '../services/firebase.js';
 import { deliveryFor, getOrder, getProduct, getStoreBySlug, listHomeProducts, listProducts, listStores, quoteCart, saveOrder } from '../services/db.js';
 import { naira } from '../services/catalog.js';
+import { bannerPhotos } from '../services/imageLibrary.js';
 import { cardBrand, getGateway, PAYMENT_MODE } from '../services/payments.js';
 import ProductCard from '../components/ProductCard.jsx';
 import { BackLink, ConfigRequired, EmptyState, ProductImage, Spinner, StatusBadge, dateTimeText } from '../components/common.jsx';
@@ -171,13 +172,14 @@ function StorefrontView({ store }) {
     out = [...out].sort(sorters[sort]);
     return out;
   }, [products, cat, q, sort, inStock]);
-  const feature = products.find(p => p.featured) || products[0];
+  const banner = useMemo(() => bannerPhotos(products), [products]);
+  const sells = store.categories?.length ? store.categories.join(' · ').toUpperCase() : 'INDEPENDENT STORE';
 
   return (
     <div className="container store-page">
       <section className="store-banner">
         <div>
-          <p className="eyebrow">INDEPENDENT STORE</p>
+          <p className="eyebrow">{sells}</p>
           <h1>{store.name}</h1>
           <p>{store.tagline || 'Thoughtfully selected, delivered to your door.'}</p>
           <div className="banner-badges">
@@ -185,7 +187,7 @@ function StorefrontView({ store }) {
             {store.whatsapp && <a href={`https://wa.me/${store.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noreferrer"><MessageCircle size={14}/> Chat on WhatsApp</a>}
           </div>
         </div>
-        {feature && <ProductImage src={feature.image} alt={feature.name}/>}
+        {banner.length > 0 && <div className={`banner-collage n${banner.length}`}>{banner.map(b => <ProductImage key={b.id} src={b.image} alt={b.name}/>)}</div>}
       </section>
 
       {loading ? <Spinner label="Loading products…"/> : products.length === 0 ? (

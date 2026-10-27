@@ -4,7 +4,7 @@ import { ArrowRight, Eye, EyeOff, MailCheck, ShoppingBag, Store as StoreIcon } f
 import { authMessage, useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import { createStore, importStarterCatalogue, isSlugAvailable } from '../services/db.js';
-import { slugify, starterCatalogue } from '../services/catalog.js';
+import { CATEGORY_INFO, slugify, startersFor } from '../services/catalog.js';
 import { ConfigRequired, RequireAuth, Spinner } from '../components/common.jsx';
 import { isFirebaseConfigured } from '../services/firebase.js';
 
@@ -152,7 +152,7 @@ function SetupStoreForm() {
   const { user, store, refresh } = useAuth();
   const nav = useNavigate();
   const toast = useToast();
-  const [form, setForm] = useState({ name: '', slug: '', tagline: '', whatsapp: '' });
+  const [form, setForm] = useState({ name: '', slug: '', tagline: '', whatsapp: '', categories: [] });
   const [touchedSlug, setTouchedSlug] = useState(false);
   const [starter, setStarter] = useState(true);
   const [available, setAvailable] = useState(null);
@@ -169,12 +169,14 @@ function SetupStoreForm() {
 
   if (store) return <Navigate to="/dashboard" replace/>;
   const setName = v => setForm(f => ({ ...f, name: v, slug: touchedSlug ? f.slug : slugify(v) }));
+  const toggle = id => setForm(f => ({ ...f, categories: f.categories.includes(id) ? f.categories.filter(c => c !== id) : [...f.categories, id] }));
+  const starterCount = startersFor(form.categories).length;
 
   const submit = async e => {
     e.preventDefault(); setError(''); setBusy(true);
     try {
       await createStore(user.uid, form);
-      if (starter) await importStarterCatalogue(user.uid);
+      if (starter) await importStarterCatalogue(user.uid, form.categories);
       await refresh();
       toast('Your store is live!', 'success');
       nav('/dashboard', { replace: true });
@@ -193,12 +195,20 @@ function SetupStoreForm() {
             <span className="slug-wrap"><i>linkshop/store/</i><input required value={form.slug} onChange={e => { setTouchedSlug(true); setForm({ ...form, slug: e.target.value }); }} placeholder="sunday-studio" maxLength="40"/></span>
             {slug.length >= 3 && available !== null && <small className={available ? 'ok-text' : 'error'}>{available ? `✓ /store/${slug} is available` : 'That link is taken'}</small>}
           </label>
+          <fieldset className="cat-fieldset">
+            <legend>What will you sell?</legend>
+            <p className="muted">Pick everything that applies. Your store and its product photos will only show these kinds of items.</p>
+            <div className="cat-picks">{CATEGORY_INFO.map(c => (
+              <button type="button" key={c.id} className={form.categories.includes(c.id) ? 'on' : ''} aria-pressed={form.categories.includes(c.id)} onClick={() => toggle(c.id)}>
+                <b>{c.id}</b><small>{c.hint}</small>
+              </button>))}</div>
+          </fieldset>
           <label>Tagline (optional)<input value={form.tagline} onChange={e => setForm({ ...form, tagline: e.target.value })} placeholder="Everyday pieces, thoughtfully picked." maxLength="90"/></label>
           <label>WhatsApp number (optional)<input type="tel" value={form.whatsapp} onChange={e => setForm({ ...form, whatsapp: e.target.value })} placeholder="2348012345678"/></label>
           <label className="check-card"><input type="checkbox" checked={starter} onChange={e => setStarter(e.target.checked)}/>
-            <span><b>Fill my store with {starterCatalogue.length} starter products</b><small>Clothing, footwear, accessories, electronics, beauty and home. Edit or delete any of them later.</small></span></label>
+            <span><b>{starterCount ? `Fill my store with ${starterCount} starter products` : 'Fill my store with starter products'}</b><small>Ready-made products with matching photos, only in the categories you picked. Edit or delete any of them later.</small></span></label>
           {error && <p className="error" role="alert">{error}</p>}
-          <button className="btn btn-dark wide" disabled={busy || available === false}>{busy ? 'Creating your store…' : 'Create store'} {!busy && <ArrowRight size={16}/>}</button>
+          <button className="btn btn-dark wide" disabled={busy || available === false || form.categories.length === 0}>{busy ? 'Creating your store…' : 'Create store'} {!busy && <ArrowRight size={16}/>}</button>
         </form>
       </div>
     </div>

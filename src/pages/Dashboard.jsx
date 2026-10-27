@@ -4,7 +4,7 @@ import { BarChart3, ClipboardList, Copy, Package, Plus, Search, Trash2, Users, W
 import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import { importStarterCatalogue, listProducts, listStoreOrders, removeProduct, saveProduct, setStock, updateOrderStatus, updateStore } from '../services/db.js';
-import { CATEGORIES, naira, starterCatalogue } from '../services/catalog.js';
+import { CATEGORIES, CATEGORY_INFO, naira, startersFor } from '../services/catalog.js';
 import { EmptyState, ProductImage, Spinner, StatusBadge, dateTimeText } from '../components/common.jsx';
 
 const DataContext = createContext(null);
@@ -117,14 +117,15 @@ function ProductForm({ initial, onClose }) {
   const { store } = useAuth();
   const { reload } = useData();
   const toast = useToast();
-  const [form, setForm] = useState({ ...blank, ...initial });
+  const sells = store.categories?.length ? store.categories : CATEGORIES;
+  const [form, setForm] = useState({ ...blank, category: sells[0], ...initial });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const set = k => e => setForm({ ...form, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value });
   const submit = async e => {
     e.preventDefault(); setBusy(true); setError('');
     try {
-      await saveProduct(store.id, form);
+      await saveProduct(store.id, form, sells);
       await reload();
       toast(form.id ? 'Product updated' : 'Product added', 'success');
       onClose();
@@ -136,7 +137,7 @@ function ProductForm({ initial, onClose }) {
         <div className="modal-head"><h3>{form.id ? 'Edit product' : 'New product'}</h3><button type="button" className="icon-btn" aria-label="Close" onClick={onClose}><X size={18}/></button></div>
         <label>Product name<input required value={form.name} onChange={set('name')} maxLength="80"/></label>
         <div className="form-row">
-          <label>Category<input required list="cats" value={form.category} onChange={set('category')}/><datalist id="cats">{CATEGORIES.map(c => <option key={c}>{c}</option>)}</datalist></label>
+          <label>Category<select required value={form.category} onChange={set('category')}>{[...new Set([...sells, form.category])].map(c => <option key={c}>{c}</option>)}</select></label>
           <label>Price (₦)<input required type="number" min="0" step="1" value={form.price} onChange={set('price')}/></label>
           <label>Stock<input required type="number" min="0" step="1" value={form.stock} onChange={set('stock')}/></label>
         </div>
@@ -167,14 +168,14 @@ export function Products() {
   };
   const importAll = async () => {
     setBusy(true);
-    try { const n = await importStarterCatalogue(store.id); await reload(); toast(`${n} products imported`, 'success'); } catch (err) { toast(err.message, 'error'); }
+    try { const n = await importStarterCatalogue(store.id, store.categories); await reload(); toast(`${n} products imported`, 'success'); } catch (err) { toast(err.message, 'error'); }
     setBusy(false);
   };
   return (
     <div className="dash-page">
       <Title title="Products" desc={`${products.length} in your catalogue.`} action={<button className="btn btn-dark" onClick={() => setEditing({})}><Plus size={16}/> Add product</button>}/>
       {products.length === 0 ? (
-        <EmptyState icon={Package} title="No products yet" text="Start from scratch, or import a ready-made catalogue to see your store come to life." action={<button className="btn btn-dark" disabled={busy} onClick={importAll}>{busy ? 'Importing…' : `Import ${starterCatalogue.length} starter products`}</button>}/>
+        <EmptyState icon={Package} title="No products yet" text="Start from scratch, or import a ready-made catalogue to see your store come to life." action={<button className="btn btn-dark" disabled={busy} onClick={importAll}>{busy ? 'Importing…' : `Import ${startersFor(store.categories).length} starter products`}</button>}/>
       ) : (
         <div className="panel">
           <label className="searchbox inline"><Search size={15}/><input value={q} onChange={e => setQ(e.target.value)} placeholder="Search products"/></label>
@@ -333,12 +334,15 @@ export function Analytics() {
 export function StoreSettings() {
   const { store, refresh } = useAuth();
   const toast = useToast();
-  const [form, setForm] = useState({ name: store.name, tagline: store.tagline || '', whatsapp: store.whatsapp || '', delivery: store.delivery || '', deliveryFee: store.deliveryFee ?? 0, freeDeliveryOver: store.freeDeliveryOver ?? 0 });
+  const [form, setForm] = useState({ name: store.name, tagline: store.tagline || '', whatsapp: store.whatsapp || '', delivery: store.delivery || '', deliveryFee: store.deliveryFee ?? 0, freeDeliveryOver: store.freeDeliveryOver ?? 0, categories: store.categories?.length ? store.categories : CATEGORIES });
+  const toggle = id => setForm(f => ({ ...f, categories: f.categories.includes(id) ? f.categories.filter(c => c !== id) : [...f.categories, id] }));
   const [busy, setBusy] = useState(false);
   const link = `${window.location.origin}/store/${store.slug}`;
   const set = k => e => setForm({ ...form, [k]: e.target.value });
   const submit = async e => {
-    e.preventDefault(); setBusy(true);
+    e.preventDefault();
+    if (!form.categories.length) { toast('Pick at least one thing your store sells.', 'error'); return; }
+    setBusy(true);
     try { await updateStore(store.id, form); await refresh(); toast('Settings saved', 'success'); } catch (err) { toast(err.message, 'error'); }
     setBusy(false);
   };
@@ -352,6 +356,12 @@ export function StoreSettings() {
         <label>Store name<input required value={form.name} onChange={set('name')} maxLength="40"/></label>
         <label>Tagline<input value={form.tagline} onChange={set('tagline')} maxLength="90"/></label>
         <label>WhatsApp number<input type="tel" value={form.whatsapp} onChange={set('whatsapp')} placeholder="2348012345678"/></label>
+        <fieldset className="cat-fieldset">
+          <legend>What you sell</legend>
+          <p className="muted">Product photos and your storefront only use these categories.</p>
+          <div className="cat-picks">{CATEGORY_INFO.map(c => (
+            <button type="button" key={c.id} className={form.categories.includes(c.id) ? 'on' : ''} aria-pressed={form.categories.includes(c.id)} onClick={() => toggle(c.id)}><b>{c.id}</b><small>{c.hint}</small></button>))}</div>
+        </fieldset>
         <h2 className="mt">Delivery</h2>
         <label>Delivery information<textarea rows="2" value={form.delivery} onChange={set('delivery')}/></label>
         <div className="form-row"><label>Delivery fee (₦)<input type="number" min="0" value={form.deliveryFee} onChange={set('deliveryFee')}/></label><label>Free delivery over (₦, 0 = never)<input type="number" min="0" value={form.freeDeliveryOver} onChange={set('freeDeliveryOver')}/></label></div>

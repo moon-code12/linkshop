@@ -3,7 +3,8 @@ import {
   serverTimestamp, setDoc, updateDoc, where, writeBatch,
 } from 'firebase/firestore';
 import { db } from './firebase.js';
-import { pickImage, slugify, starterCatalogue } from './catalog.js';
+import { slugify, startersFor } from './catalog.js';
+import { pickImage } from './imageLibrary.js';
 
 export const ORDER_STATUSES = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
 export const DELIVERY_FEE_DEFAULT = 2500;
@@ -52,15 +53,16 @@ export async function listHomeProducts(stores, max = 8) {
 export async function isSlugAvailable(slug) {
   return !(await getDoc(doc(db, 'slugs', slug))).exists();
 }
-export async function createStore(uid, { name, slug, tagline, whatsapp }) {
+export async function createStore(uid, { name, slug, tagline, whatsapp, categories }) {
   const clean = slugify(slug || name);
   if (clean.length < 3) throw new Error('Choose a store link with at least 3 letters or numbers.');
+  if (!categories?.length) throw new Error('Pick at least one thing your store sells.');
   await runTransaction(db, async tx => {
     const slugRef = doc(db, 'slugs', clean);
     if ((await tx.get(slugRef)).exists()) throw new Error('That store link is already taken. Try another.');
     tx.set(slugRef, { storeId: uid });
     tx.set(doc(db, 'stores', uid), {
-      name: name.trim(), slug: clean, ownerId: uid, tagline: tagline?.trim() || '', whatsapp: whatsapp?.trim() || '',
+      name: name.trim(), slug: clean, ownerId: uid, tagline: tagline?.trim() || '', whatsapp: whatsapp?.trim() || '', categories,
       delivery: 'Delivery arranged by the seller after you order.', deliveryFee: DELIVERY_FEE_DEFAULT,
       freeDeliveryOver: 100000, createdAt: serverTimestamp(),
     });
@@ -70,6 +72,7 @@ export async function createStore(uid, { name, slug, tagline, whatsapp }) {
 export async function updateStore(storeId, data) {
   await updateDoc(doc(db, 'stores', storeId), {
     name: data.name.trim(), tagline: data.tagline.trim(), whatsapp: data.whatsapp.trim(), delivery: data.delivery.trim(),
+    ...(data.categories?.length ? { categories: data.categories } : {}),
     deliveryFee: Math.max(0, Number(data.deliveryFee) || 0), freeDeliveryOver: Math.max(0, Number(data.freeDeliveryOver) || 0),
   });
 }
@@ -83,13 +86,14 @@ export async function getProduct(storeId, productId) {
   const snap = await getDoc(doc(db, 'stores', storeId, 'products', productId));
   return snap.exists() ? withId(snap) : null;
 }
-const cleanProduct = p => ({
+// `sells` is the list of categories the store sells; automatic photos never come from outside it.
+const cleanProduct = (p, sells = []) => ({
   name: p.name.trim(), category: p.category.trim(), description: (p.description || '').trim(),
-  ...(p.image && !p.autoImage ? { image: p.image.trim(), autoImage: false } : { image: pickImage(p.name, p.category), autoImage: true }),
+  ...(p.image && !p.autoImage ? { image: p.image.trim(), autoImage: false } : { image: pickImage(p.name, p.category, sells), autoImage: true }),
   price: Math.max(0, Math.round(Number(p.price) || 0)), stock: Math.max(0, Math.round(Number(p.stock) || 0)), featured: Boolean(p.featured),
 });
-export async function saveProduct(storeId, product) {
-  const data = cleanProduct(product);
+export async function saveProduct(storeId, product, sells) {
+  const data = cleanProduct(product, sells);
   if (product.id) { await updateDoc(doc(db, 'stores', storeId, 'products', product.id), data); return product.id; }
   const ref = await addDoc(productsRef(storeId), { ...data, createdAt: serverTimestamp() });
   return ref.id;
@@ -100,13 +104,15 @@ export async function removeProduct(storeId, productId) {
 export async function setStock(storeId, productId, stock) {
   await updateDoc(doc(db, 'stores', storeId, 'products', productId), { stock: Math.max(0, Math.round(Number(stock) || 0)) });
 }
-export async function importStarterCatalogue(storeId) {
+// Imports only the starter products in the categories the store sells.
+export async function importStarterCatalogue(storeId, sells) {
+  const items = startersFor(sells);
   const batch = writeBatch(db);
-  starterCatalogue.forEach((p, i) => {
-    batch.set(doc(productsRef(storeId)), { ...cleanProduct(p), createdAt: new Date(Date.now() - i * 1000) });
+  items.forEach((p, i) => {
+    batch.set(doc(productsRef(storeId)), { ...cleanProduct(p, sells), createdAt: new Date(Date.now() - i * 1000) });
   });
   await batch.commit();
-  return starterCatalogue.length;
+  return items.length;
 }
 
 /* ---------- orders ---------- */

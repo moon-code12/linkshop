@@ -1,86 +1,111 @@
-// Starter catalogue a seller can import into their own store in one click.
-// These are written to the seller's Firestore products collection, then edited or deleted freely.
-const img = id => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=900&q=85`;
+// What a store can sell. Each category has its own reviewed photo library (see imageLibrary.js),
+// so a store only ever shows pictures of the kinds of product its seller chose.
+import { photo } from './imageLibrary.js';
 
-export const CATEGORIES = ['Clothing', 'Footwear', 'Accessories', 'Electronics', 'Beauty', 'Home & Living'];
+export const CATEGORY_INFO = [
+  { id: 'Gadgets', hint: 'Phones, laptops, audio, cameras' },
+  { id: 'Clothing', hint: 'Tops, dresses, jeans, jackets' },
+  { id: 'Footwear', hint: 'Sneakers, boots, heels, loafers' },
+  { id: 'Bags & Accessories', hint: 'Bags, watches, jewelry, sunglasses' },
+  { id: 'Beauty', hint: 'Skincare, makeup, fragrance' },
+  { id: 'Home & Living', hint: 'Furniture, lighting, decor, kitchen' },
+];
+export const CATEGORIES = CATEGORY_INFO.map(c => c.id);
 
+// p(category, photoGroup, photoIndex, name, price, stock, description, featured)
+const p = (category, group, index, name, price, stock, description, featured = false) =>
+  ({ name, category, price, stock, description, featured, image: photo(category, group, index) });
+
+// Starter products for a store. Every photo is a picture of the product it is named after.
 export const starterCatalogue = [
+  // Gadgets
+  p('Gadgets', 'laptop', 0, 'Slimbook Pro 14 Laptop', 520000, 3, '14-inch ultraportable with a fast SSD, 16GB memory and all-day battery.', true),
+  p('Gadgets', 'laptop', 3, 'UltraBook 13 Laptop', 480000, 5, 'Lightweight 13-inch laptop with a sharp display for work and study.'),
+  p('Gadgets', 'phone', 0, 'Lumen X Smartphone', 245000, 7, '6.5-inch OLED display, 128GB storage and a sharp dual-camera system.', true),
+  p('Gadgets', 'phone', 4, 'Nova 5G Smartphone', 210000, 9, 'Fast 5G, a bright display and a battery that lasts the full day.'),
+  p('Gadgets', 'tablet', 0, 'Tab S 10-inch Tablet', 190000, 6, 'Large crisp screen for streaming, reading and note-taking.'),
+  p('Gadgets', 'headphones', 1, 'Studio Wireless Headphones', 58000, 10, 'Over-ear Bluetooth headphones with deep bass and 30-hour battery life.', true),
+  p('Gadgets', 'headphones', 2, 'Quiet Pro Noise-Cancelling Headphones', 72000, 8, 'Active noise cancelling for flights, commutes and focus time.'),
+  p('Gadgets', 'earbuds', 0, 'AirBuds Wireless Earbuds', 38000, 16, 'True wireless earbuds with a pocket charging case.'),
+  p('Gadgets', 'smartwatch', 0, 'Pulse Smartwatch', 46000, 12, 'Heart-rate, sleep and step tracking with a bright always-on display.'),
+  p('Gadgets', 'camera', 0, 'Frame Mirrorless Camera', 395000, 2, 'Compact mirrorless camera for crisp photos and 4K video.'),
+  p('Gadgets', 'speaker', 0, 'Boom Portable Bluetooth Speaker', 42000, 14, 'Water-resistant speaker with big sound and 12 hours of playtime.'),
+  p('Gadgets', 'peripherals', 0, 'Slim Wireless Keyboard', 15000, 22, 'Quiet low-profile keys with a long-lasting rechargeable battery.'),
+  p('Gadgets', 'peripherals', 1, 'Precision Wireless Mouse', 9500, 30, 'Comfortable ergonomic mouse with smooth tracking.'),
   // Clothing
-  { name: 'Soft Knit Set', category: 'Clothing', price: 28000, stock: 8, image: img('1551232864-3f0890e580d9'), featured: true, description: 'An easy-to-style knit set for relaxed days. Breathable, stretchy and gentle on skin.' },
-  { name: 'Weekend Linen Shirt', category: 'Clothing', price: 18500, stock: 11, image: img('1598033129183-c4f50c736f10'), description: 'A lightweight linen shirt that keeps you cool from morning to evening.' },
-  { name: 'Essential Cotton Tee', category: 'Clothing', price: 7500, stock: 40, image: img('1521572163474-6864f9cf17ab'), description: 'Heavyweight 100% cotton tee with a clean fit that goes with everything.' },
-  { name: 'Graphic Street Tee', category: 'Clothing', price: 9500, stock: 26, image: img('1618354691373-d851c5c3a990'), description: 'Relaxed-cut tee with a soft hand-feel and a bold everyday look.' },
-  { name: 'Heritage Denim Jeans', category: 'Clothing', price: 24000, stock: 15, image: img('1542272604-787c3835535d'), description: 'Straight-leg jeans in durable stretch denim that gets better with every wear.' },
-  { name: 'Cloud Fleece Hoodie', category: 'Clothing', price: 21000, stock: 18, image: img('1556821840-3a63f95609a7'), featured: true, description: 'A brushed-fleece hoodie that feels like a hug. Roomy hood, kangaroo pocket.' },
-  { name: 'Merino Crew Sweater', category: 'Clothing', price: 26500, stock: 9, image: img('1620799140408-edc6dcb6d633'), description: 'Fine-gauge crew neck sweater, warm without the bulk.' },
-  { name: 'Stone Leather Jacket', category: 'Clothing', price: 78000, stock: 5, image: img('1551028719-00167b16eac5'), description: 'A timeless leather jacket with a soft lining and a sharp silhouette.' },
-  { name: 'Utility Field Jacket', category: 'Clothing', price: 39000, stock: 7, image: img('1591047139829-d91aecb6caea'), description: 'Water-resistant field jacket with four pockets and an adjustable waist.' },
+  p('Clothing', 'tee', 4, 'Essential White Tee', 7500, 40, 'Heavyweight 100% cotton tee with a clean fit that goes with everything.', true),
+  p('Clothing', 'tee', 1, 'Classic Black Tee', 7500, 36, 'Soft, breathable cotton tee in a relaxed everyday cut.'),
+  p('Clothing', 'tee', 0, 'Colour Block Tee Pack', 21000, 18, 'A pack of four premium tees in versatile colours.'),
+  p('Clothing', 'shirt', 0, 'Oxford Dress Shirt', 18500, 14, 'Crisp cotton shirt for the office and smart occasions.'),
+  p('Clothing', 'shirt', 2, 'Denim Button Shirt', 16500, 11, 'A soft denim shirt that layers well in any season.'),
+  p('Clothing', 'dress', 0, 'Flame Red Maxi Dress', 34000, 8, 'A flowing maxi dress made to turn heads at any event.', true),
+  p('Clothing', 'dress', 1, 'Floral Wrap Dress', 28500, 10, 'Light floral dress with an easy wrap fit.'),
+  p('Clothing', 'jeans', 2, 'Skinny Blue Jeans', 24000, 15, 'Stretch denim skinny jeans that hold their shape.'),
+  p('Clothing', 'jeans', 1, 'Distressed Denim Jeans', 26000, 12, 'Straight-leg jeans with a worn-in, street-ready finish.'),
+  p('Clothing', 'hoodie', 0, 'Cloud Fleece Hoodie', 21000, 18, 'A brushed-fleece hoodie that feels like a hug.'),
+  p('Clothing', 'jacket', 0, 'Stone Leather Jacket', 78000, 5, 'A timeless leather jacket with a soft lining and a sharp silhouette.', true),
+  p('Clothing', 'jacket', 1, 'Rust Bomber Jacket', 39000, 7, 'Lightweight zip bomber for cool evenings.'),
+  p('Clothing', 'suit', 0, 'Navy Two-Piece Suit', 95000, 4, 'A sharply tailored two-piece suit for work and weddings.'),
+  p('Clothing', 'sweater', 1, 'Cream Knit Poncho', 23000, 9, 'A cosy hand-feel knit poncho with a fringed hem.'),
   // Footwear
-  { name: 'Classic Sneakers', category: 'Footwear', price: 32000, stock: 6, image: img('1542291026-7eec264c27ff'), featured: true, description: 'A clean, versatile sneaker for everyday wear with a cushioned insole.' },
-  { name: 'Court White Trainers', category: 'Footwear', price: 29500, stock: 14, image: img('1595950653106-6c9ebd614d3a'), description: 'Minimal white trainers in smooth leather. Easy to dress up or down.' },
-  { name: 'Street Runner', category: 'Footwear', price: 35000, stock: 12, image: img('1491553895911-0055eca6402d'), description: 'Lightweight runner with a responsive sole built for long city days.' },
-  { name: 'Everyday Lace-Ups', category: 'Footwear', price: 27000, stock: 10, image: img('1549298916-b41d501d3772'), description: 'Comfortable lace-ups with a flexible outsole and breathable lining.' },
-  { name: 'Block Heel Sandals', category: 'Footwear', price: 22500, stock: 9, image: img('1543163521-1bf539c55dd2'), description: 'Elegant block heels that stay comfortable from the office to the evening.' },
-  // Accessories
-  { name: 'Everyday Tote', category: 'Accessories', price: 12500, stock: 14, image: img('1590874103328-eac38a683ce7'), description: 'A roomy canvas tote for work, errands and weekends.' },
-  { name: 'Daily Carry Pouch', category: 'Accessories', price: 8500, stock: 22, image: img('1606760227091-3dd870d97f1d'), description: 'Keep your small essentials together wherever you go.' },
-  { name: 'Minimal Wristwatch', category: 'Accessories', price: 24000, stock: 4, image: img('1524805444758-089113d48a6d'), featured: true, description: 'A slim stainless-steel watch with a clean dial and a leather strap.' },
-  { name: 'Voyager Backpack', category: 'Accessories', price: 31000, stock: 13, image: img('1553062407-98eeb64c6a62'), description: 'Padded 18L backpack with a laptop sleeve and weather-resistant fabric.' },
-  { name: 'Structured Handbag', category: 'Accessories', price: 42000, stock: 6, image: img('1584917865442-de89df76afd3'), description: 'A polished structured handbag with a detachable shoulder strap.' },
-  { name: 'Crossbody City Bag', category: 'Accessories', price: 19500, stock: 17, image: img('1548036328-c9fa89d128fa'), description: 'Compact crossbody with secure zip closure and an adjustable strap.' },
-  { name: 'Aviator Sunglasses', category: 'Accessories', price: 14500, stock: 20, image: img('1572635196237-14b3f281503f'), description: 'UV400 polarised lenses in a lightweight frame.' },
-  // Electronics
-  { name: 'Studio Wireless Headphones', category: 'Electronics', price: 58000, stock: 10, image: img('1505740420928-5e560c06d30e'), featured: true, description: 'Over-ear Bluetooth headphones with deep bass and 30-hour battery life.' },
-  { name: 'Pulse Smartwatch', category: 'Electronics', price: 46000, stock: 12, image: img('1546868871-7041f2a55e12'), description: 'Heart-rate, sleep and step tracking with a bright always-on display.' },
-  { name: 'Aura Over-Ear Headset', category: 'Electronics', price: 36000, stock: 16, image: img('1583394838336-acd977736f90'), description: 'Comfortable headset with a clear built-in microphone for calls and music.' },
-  { name: 'Slimbook 14 Laptop', category: 'Electronics', price: 520000, stock: 3, image: img('1496181133206-80ce9b88a853'), description: '14-inch ultraportable with a fast SSD, 16GB memory and all-day battery.' },
-  { name: 'Lumen X Smartphone', category: 'Electronics', price: 245000, stock: 7, image: img('1511707171634-5f897ff02aa9'), description: '6.5-inch OLED display, 128GB storage and a sharp dual-camera system.' },
-  { name: 'Frame Mirrorless Camera', category: 'Electronics', price: 395000, stock: 2, image: img('1526170375885-4d8ecf77b99f'), description: 'Compact mirrorless camera for crisp photos and 4K video.' },
+  p('Footwear', 'sneakers', 3, 'Court White Sneakers', 29500, 14, 'Minimal white sneakers that go with everything.', true),
+  p('Footwear', 'sneakers', 2, 'Volt Training Shoes', 35000, 12, 'Lightweight trainers with a responsive sole for the gym.'),
+  p('Footwear', 'sneakers', 4, 'City Runner Sneakers', 33000, 10, 'Cushioned runners built for long city days.'),
+  p('Footwear', 'sneakers', 5, 'Heritage Orange Sneakers', 38000, 6, 'A bold retro sneaker with a chunky air-cushioned sole.', true),
+  p('Footwear', 'sneakers', 7, 'Street Skate Shoes', 27000, 13, 'Durable low-top skate shoes with a grippy sole.'),
+  p('Footwear', 'sneakers', 8, 'Flyknit Olive Trainers', 36000, 9, 'Breathable knit trainers with a snug, sock-like fit.'),
+  p('Footwear', 'sneakers', 12, 'Pastel Court Sneakers', 31000, 11, 'Soft pastel sneakers for a fresh everyday look.'),
+  p('Footwear', 'sneakers', 14, 'Carob Leather Sneakers', 34000, 8, 'Premium leather sneakers in a warm earthy tone.'),
+  p('Footwear', 'boots', 0, 'Trail Leather Boots', 52000, 7, 'Hard-wearing leather boots with a sturdy sole.'),
+  p('Footwear', 'formal', 0, 'Moss Suede Loafers', 28000, 9, 'Soft suede loafers that dress up any outfit.'),
+  p('Footwear', 'heels', 0, 'Floral Stiletto Heels', 22500, 9, 'Statement stilettos in a vivid floral print.'),
+  // Bags & Accessories
+  p('Bags & Accessories', 'backpack', 0, 'Voyager Backpack', 31000, 13, 'Padded 18L backpack with a laptop sleeve and weather-resistant fabric.', true),
+  p('Bags & Accessories', 'backpack', 2, 'Urban Commuter Backpack', 26000, 15, 'A sleek everyday backpack with plenty of organised pockets.'),
+  p('Bags & Accessories', 'handbag', 0, 'Blush Chain Bag', 24000, 10, 'A compact blush shoulder bag with a gold chain strap.'),
+  p('Bags & Accessories', 'handbag', 2, 'Ruby Structured Handbag', 42000, 6, 'A polished structured handbag in a bold red.', true),
+  p('Bags & Accessories', 'handbag', 3, 'Quilted Crossbody Bag', 46000, 5, 'Quilted black crossbody with a chain strap and secure zip.'),
+  p('Bags & Accessories', 'handbag', 4, 'Woven Basket Handbag', 29000, 8, 'A handwoven basket bag with a leather top handle.'),
+  p('Bags & Accessories', 'wallet', 0, 'Leather Bifold Wallet', 12500, 25, 'Slim full-grain leather wallet with card slots.'),
+  p('Bags & Accessories', 'sunglasses', 0, 'Round Gold Sunglasses', 14500, 20, 'UV400 round lenses in a lightweight gold frame.'),
+  p('Bags & Accessories', 'sunglasses', 2, 'Classic Wayfarer Sunglasses', 16500, 18, 'The timeless black frame, with polarised lenses.'),
+  p('Bags & Accessories', 'watch', 0, 'Heritage Chronograph Watch', 54000, 4, 'A classic chronograph with a leather strap.', true),
+  p('Bags & Accessories', 'watch', 1, 'Automatic Skeleton Watch', 72000, 3, 'A self-winding watch with a visible movement.'),
+  p('Bags & Accessories', 'jewelry', 1, 'Sapphire Drop Earrings', 19500, 12, 'Statement drop earrings with sapphire-blue stones.'),
+  p('Bags & Accessories', 'jewelry', 0, 'Gold Pendant Necklace', 15500, 16, 'A delicate layered necklace with a pendant.'),
+  p('Bags & Accessories', 'jewelry', 3, 'Halo Crystal Ring', 21000, 9, 'A sparkling halo ring set with brilliant crystals.'),
   // Beauty
-  { name: 'Glow Serum 30ml', category: 'Beauty', price: 11500, stock: 30, image: img('1556228453-efd6c1ff04f6'), featured: true, description: 'Brightening vitamin-C serum that evens tone and adds natural glow.' },
-  { name: 'Daily Hydration Cream', category: 'Beauty', price: 9800, stock: 28, image: img('1612817288484-6f916006741a'), description: 'Lightweight moisturiser with hyaluronic acid for all-day softness.' },
-  { name: 'Skin Ritual Duo', category: 'Beauty', price: 16500, stock: 18, image: img('1571781926291-c477ebfd024b'), description: 'Cleanser and toner pair for a simple, effective morning and night routine.' },
-  { name: 'Studio Makeup Palette', category: 'Beauty', price: 13500, stock: 21, image: img('1596462502278-27bfdc403348'), description: 'Twelve blendable, richly pigmented shades from neutral to bold.' },
-  { name: 'Ember Eau de Parfum', category: 'Beauty', price: 34000, stock: 11, image: img('1585386959984-a4155224a1ad'), description: 'A warm amber and vanilla fragrance with long-lasting wear.' },
-  { name: 'Botanical Soap Trio', category: 'Beauty', price: 6500, stock: 35, image: img('1608248543803-ba4f8c70ae0b'), description: 'Three cold-process soaps with shea butter and natural oils.' },
+  p('Beauty', 'skincare', 9, 'Glow Dropper Serum 30ml', 11500, 30, 'Brightening serum that evens tone and adds a natural glow.', true),
+  p('Beauty', 'skincare', 0, 'Gentle Gel Cleanser', 8500, 34, 'A soft gel cleanser that removes make-up without drying skin.'),
+  p('Beauty', 'skincare', 1, 'Silk Body Lotion 200ml', 9800, 28, 'Lightweight body lotion with all-day moisture.'),
+  p('Beauty', 'skincare', 2, 'Clarifying Face Cream', 10500, 24, 'Oil-free cream that calms and clears blemish-prone skin.'),
+  p('Beauty', 'skincare', 3, 'Glow Skincare Set', 28000, 15, 'A complete routine: cleanser, cream and a facial roller.'),
+  p('Beauty', 'skincare', 8, 'Restorative Hair Mask', 12500, 20, 'Deep-conditioning mask for dry, damaged hair.'),
+  p('Beauty', 'makeup', 0, 'Gloss Lip & Nail Duo', 9500, 26, 'A matching high-shine lip colour and nail polish.'),
+  p('Beauty', 'makeup', 2, 'Bronzer & Highlighter Palette', 13500, 21, 'Blendable shades to sculpt and glow.', true),
+  p('Beauty', 'makeup', 3, 'Rose Makeup Brush Kit', 14500, 17, 'Soft-bristle brushes for a flawless blend.'),
+  p('Beauty', 'perfume', 0, 'Midnight Blue Eau de Parfum', 34000, 11, 'A fresh aromatic fragrance with a long-lasting finish.', true),
+  p('Beauty', 'perfume', 2, 'Amber Rose Parfum', 38000, 9, 'A warm, feminine fragrance of amber and rose.'),
+  p('Beauty', 'perfume', 3, 'Noir Eau de Parfum', 41000, 8, 'A deep, elegant scent for evenings out.'),
   // Home & Living
-  { name: 'Haven Lounge Chair', category: 'Home & Living', price: 98000, stock: 4, image: img('1586023492125-27b2c045efd7'), description: 'A deep-seated accent chair with solid wood legs and soft upholstery.' },
-  { name: 'Linen Sofa, Three-Seater', category: 'Home & Living', price: 340000, stock: 2, image: img('1555041469-a586c61ea9bc'), description: 'A generous three-seater with removable linen covers and firm cushions.' },
-  { name: 'Oak Dining Chair', category: 'Home & Living', price: 45000, stock: 12, image: img('1493663284031-b7e3aefcae8e'), description: 'Solid oak dining chair with a curved back. Sold individually.' },
-  { name: 'Stoneware Mug Set', category: 'Home & Living', price: 8800, stock: 25, image: img('1514228742587-6b1558fcca3d'), description: 'Set of two hand-glazed stoneware mugs. Dishwasher safe.' },
-  { name: 'Steel Insulated Bottle', category: 'Home & Living', price: 7200, stock: 45, image: img('1602143407151-7111542de6e8'), description: 'Keeps drinks cold for 24 hours or hot for 12. Leak-proof lid.' },
-  { name: 'The Reader’s Bundle', category: 'Home & Living', price: 15500, stock: 19, image: img('1544947950-fa07a98d237f'), description: 'A curated bundle of three bestselling paperbacks for slow evenings.' },
+  p('Home & Living', 'sofa', 3, 'Emerald Velvet Sofa', 340000, 2, 'A generous three-seater in rich velvet with solid wood legs.', true),
+  p('Home & Living', 'sofa', 1, 'Sky Blue Three-Seater Sofa', 295000, 3, 'A bright button-tufted sofa with removable cushions.'),
+  p('Home & Living', 'sofa', 2, 'Tan Modular Sofa', 310000, 2, 'A soft, deep sofa in a warm leather-look finish.'),
+  p('Home & Living', 'chair', 0, 'Tufted Accent Chair', 98000, 4, 'A tufted accent chair with turned legs for a touch of elegance.'),
+  p('Home & Living', 'chair', 3, 'Mustard Reading Chair', 88000, 5, 'A comfy reading chair with slim wooden legs.', true),
+  p('Home & Living', 'chair', 1, 'Oak Bar Stool', 45000, 12, 'A solid wood stool for counters and workbenches.'),
+  p('Home & Living', 'lamp', 1, 'Arc Floor Lamp', 52000, 7, 'A sweeping arc lamp that lights up a reading corner.'),
+  p('Home & Living', 'lamp', 0, 'Industrial Pendant Light', 24000, 14, 'A matte metal pendant for kitchens and dining spaces.'),
+  p('Home & Living', 'storage', 1, 'Walnut Sideboard', 165000, 3, 'Mid-century sideboard with plenty of room for storage.'),
+  p('Home & Living', 'storage', 0, 'Wall Storage Cabinet', 58000, 6, 'A slim wall cabinet with open shelves.'),
+  p('Home & Living', 'bedroom', 0, 'Linen Bed Set', 62000, 9, 'Soft, breathable linen bedding in a calm neutral.'),
+  p('Home & Living', 'decor', 2, 'Ceramic Vase Set', 17500, 20, 'A set of three matte ceramic vases for dried stems.'),
+  p('Home & Living', 'drinkware', 0, 'Stoneware Mug', 4500, 40, 'A hand-glazed stoneware mug. Dishwasher safe.'),
+  p('Home & Living', 'drinkware', 1, 'Latte Cup & Saucer', 6800, 25, 'A wide ceramic cup and saucer for your morning coffee.'),
+  p('Home & Living', 'bottle', 0, 'Steel Insulated Bottle', 7200, 45, 'Keeps drinks cold for 24 hours or hot for 12.'),
 ];
 
-// Automatic product photos: sellers never add images. A photo is chosen from the product's name,
-// falling back to its category. Only verified image ids are used.
-const KEYWORD_IMAGES = [
-  [/hood|fleece/, ['1556821840-3a63f95609a7']], [/sweater|knit|jumper|cardigan/, ['1620799140408-edc6dcb6d633', '1551232864-3f0890e580d9']],
-  [/leather jacket|jacket|coat|blazer/, ['1551028719-00167b16eac5', '1591047139829-d91aecb6caea']], [/jean|denim|trouser|pant/, ['1542272604-787c3835535d']],
-  [/tee|t-shirt|tshirt|shirt|top|polo|blouse/, ['1521572163474-6864f9cf17ab', '1618354691373-d851c5c3a990', '1598033129183-c4f50c736f10']],
-  [/sandal|heel|slide|slipper/, ['1543163521-1bf539c55dd2']], [/sneaker|trainer|runner|shoe|boot|loafer|lace/, ['1542291026-7eec264c27ff', '1595950653106-6c9ebd614d3a', '1491553895911-0055eca6402d', '1549298916-b41d501d3772']],
-  [/backpack|rucksack/, ['1553062407-98eeb64c6a62']], [/handbag|purse|clutch|crossbody/, ['1584917865442-de89df76afd3', '1548036328-c9fa89d128fa']], [/tote|bag|pouch|wallet/, ['1590874103328-eac38a683ce7', '1606760227091-3dd870d97f1d']],
-  [/watch|wristwatch/, ['1524805444758-089113d48a6d', '1523275335684-37898b6baf30']], [/sunglass|glasses|shades/, ['1572635196237-14b3f281503f']],
-  [/smartwatch|fitness band/, ['1546868871-7041f2a55e12']], [/headphone|headset|earphone|earbud|speaker/, ['1505740420928-5e560c06d30e', '1583394838336-acd977736f90']],
-  [/laptop|computer|notebook pc/, ['1496181133206-80ce9b88a853']], [/phone|iphone|android|smartphone/, ['1511707171634-5f897ff02aa9']], [/camera|lens/, ['1526170375885-4d8ecf77b99f']],
-  [/perfume|fragrance|cologne|parfum|scent/, ['1585386959984-a4155224a1ad', '1541643600914-78b084683601', '1594035910387-fea47794261f']], [/makeup|lipstick|palette|foundation|mascara|cosmetic/, ['1596462502278-27bfdc403348', '1522335789203-aabd1fc54bc9']],
-  [/serum|cream|lotion|moistur|cleanser|toner|skin|face/, ['1556228453-efd6c1ff04f6', '1612817288484-6f916006741a', '1571781926291-c477ebfd024b']], [/soap|bath|body wash/, ['1608248543803-ba4f8c70ae0b', '1608571423902-eed4a5ad8108']],
-  [/sofa|couch/, ['1555041469-a586c61ea9bc']], [/chair|stool|seat/, ['1586023492125-27b2c045efd7', '1493663284031-b7e3aefcae8e']], [/mug|cup|plate|bowl|ceramic|stoneware/, ['1514228742587-6b1558fcca3d', '1517256064527-09c73fc73e38']],
-  [/bottle|flask|tumbler/, ['1602143407151-7111542de6e8']], [/book|novel|paperback/, ['1544947950-fa07a98d237f']],
-];
-const CATEGORY_IMAGES = {
-  clothing: ['1521572163474-6864f9cf17ab', '1556821840-3a63f95609a7', '1542272604-787c3835535d'], footwear: ['1542291026-7eec264c27ff', '1595950653106-6c9ebd614d3a'],
-  accessories: ['1524805444758-089113d48a6d', '1590874103328-eac38a683ce7', '1572635196237-14b3f281503f'], electronics: ['1505740420928-5e560c06d30e', '1496181133206-80ce9b88a853', '1511707171634-5f897ff02aa9'],
-  beauty: ['1556228453-efd6c1ff04f6', '1596462502278-27bfdc403348', '1585386959984-a4155224a1ad'], 'home & living': ['1586023492125-27b2c045efd7', '1514228742587-6b1558fcca3d', '1555041469-a586c61ea9bc'],
-};
-const GENERIC = ['1523381210434-271e8be1f52b', '1590874103328-eac38a683ce7', '1524805444758-089113d48a6d'];
-const hash = text => [...text].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
-export function pickImage(name = '', category = '') {
-  const text = String(name).toLowerCase();
-  const hit = KEYWORD_IMAGES.find(([re]) => re.test(text));
-  const pool = hit ? hit[1] : CATEGORY_IMAGES[String(category).toLowerCase()] || GENERIC;
-  return img(pool[hash(text) % pool.length]);
-}
+export const startersFor = categories => starterCatalogue.filter(item => !categories?.length || categories.includes(item.category));
 
 export const naira = amount =>
   new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 }).format(Number(amount) || 0);
