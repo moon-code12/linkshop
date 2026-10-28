@@ -47,14 +47,14 @@ export function Header() {
     <header className="header">
       <div className="container header-inner">
         <Brand/>
-        <nav><Link to="/#stores">Explore stores</Link><Link to="/#how">How it works</Link><Link to="/signup?role=seller">Sell with LinkShop</Link></nav>
+        <nav><Link to="/stores">Explore stores</Link><Link to="/#how">How it works</Link><Link to="/signup?role=seller">Sell with LinkShop</Link></nav>
         <div className="head-actions">
           <Link className="cart-link" to={storeSlug ? `/store/${storeSlug}/cart` : '/#stores'} aria-label={`Shopping bag, ${count} items`}><ShoppingBag size={19}/>{count > 0 && <span>{count}</span>}</Link>
           <AccountMenu/>
           <button className="menu-btn" onClick={() => setOpen(!open)} aria-expanded={open} aria-label="Menu">{open ? <X size={20}/> : <Menu size={20}/>}</button>
         </div>
       </div>
-      {open && <nav className="mobile-nav"><Link to="/#stores">Explore stores</Link><Link to="/#how">How it works</Link><Link to="/signup?role=seller">Sell with LinkShop</Link>{!user && <Link to="/login">Log in</Link>}</nav>}
+      {open && <nav className="mobile-nav"><Link to="/stores">Explore stores</Link><Link to="/#how">How it works</Link><Link to="/signup?role=seller">Sell with LinkShop</Link>{!user && <Link to="/login">Log in</Link>}</nav>}
     </header>
   );
 }
@@ -77,7 +77,7 @@ export function SiteLayout() {
       <footer className="footer">
         <div className="container foot-grid">
           <div><Brand/><p className="muted">Real storefronts for independent sellers. Share one link, take orders, run your business.</p></div>
-          <div><b>Shop</b><Link to="/#stores">Explore stores</Link><Link to="/account">Track an order</Link></div>
+          <div><b>Shop</b><Link to="/stores">Explore stores</Link><Link to="/account">Track an order</Link></div>
           <div><b>Sell</b><Link to="/signup?role=seller">Open a store</Link><Link to="/login">Seller login</Link></div>
           <div><b>Company</b><span>Payments run in test mode.</span><span>© {new Date().getFullYear()} LinkShop</span></div>
         </div>

@@ -263,3 +263,6 @@ pre { background: #1f241e; color: #e9eadf; padding: 16px; border-radius: 10px; f
   .banner-collage.n1 { grid-template-columns: 1fr; }
   .cat-picks { grid-template-columns: 1fr; }
 }
+
+.search-box { display: flex; align-items: center; gap: 10px; max-width: 420px; margin: 16px 0 24px; padding: 0 14px; border: 1px solid #d8d8d8; border-radius: 12px; background: #fff; }
+.search-box input { flex: 1; border: 0; outline: 0; padding: 12px 0; font: inherit; background: transparent; }

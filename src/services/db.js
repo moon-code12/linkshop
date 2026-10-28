@@ -36,8 +36,10 @@ export async function getStoreByOwner(uid) {
   return snap.exists() ? withId(snap) : null;
 }
 export async function listStores(max = 12) {
-  const snap = await getDocs(query(collection(db, 'stores'), orderBy('createdAt', 'desc'), limit(max)));
-  return snap.docs.map(withId);
+  // No orderBy in the query: Firestore drops documents that lack the ordered field, which would hide older stores.
+  const snap = await getDocs(collection(db, 'stores'));
+  const time = s => s.createdAt?.toMillis?.() ?? 0;
+  return snap.docs.map(withId).filter(s => s.name && s.slug).sort((a, b) => time(b) - time(a)).slice(0, max);
 }
 // Featured products across stores for the homepage (falls back to any products if none are featured).
 export async function listHomeProducts(stores, max = 8) {

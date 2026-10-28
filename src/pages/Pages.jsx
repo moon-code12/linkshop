@@ -58,12 +58,47 @@ const HERO = [
   'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=600&q=80',
 ];
 
+export function AllStores() {
+  const [stores, setStores] = useState(null);
+  const [error, setError] = useState('');
+  const [q, setQ] = useState('');
+  useEffect(() => {
+    if (!isFirebaseConfigured) { setStores([]); return; }
+    listStores(500).then(setStores).catch(err => { console.error('Could not load stores:', err); setError(err.message); setStores([]); });
+  }, []);
+  const shown = useMemo(() => {
+    const term = q.trim().toLowerCase();
+    if (!term) return stores || [];
+    return (stores || []).filter(s => [s.name, s.slug, s.tagline, ...(s.categories || [])].some(v => v?.toLowerCase().includes(term)));
+  }, [stores, q]);
+  return (
+    <section className="section">
+      <div className="container">
+        <p className="eyebrow">EXPLORE</p>
+        <h2>All stores on LinkShop</h2>
+        <label className="search-box"><Search size={16}/><input value={q} onChange={e => setQ(e.target.value)} placeholder="Search by store name or category" aria-label="Search stores"/></label>
+        {error && <div className="demo-alert">{error}</div>}
+        {stores === null ? <Spinner/> : shown.length === 0 ? (
+          <EmptyState icon={StoreIcon} title={q ? 'No matching stores' : 'No stores yet'} text={q ? 'Try a different name or category.' : 'Be the first. Open a store and it will appear here.'} action={<Link className="btn btn-dark" to="/signup?role=seller">Open a store</Link>}/>
+        ) : (
+          <div className="store-cards">{shown.map(s => (
+            <Link key={s.id} to={`/store/${s.slug}`} className="store-card">
+              <span className="store-initial">{s.name[0]?.toUpperCase()}</span>
+              <div><b>{s.name}</b><small>{s.tagline || `linkshop.app/${s.slug}`}</small></div><ArrowRight size={16}/>
+            </Link>
+          ))}</div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 export function Home() {
   const [stores, setStores] = useState(null);
   const [picks, setPicks] = useState([]);
   useEffect(() => {
     if (!isFirebaseConfigured) { setStores([]); return; }
-    listStores(9).then(list => { setStores(list); listHomeProducts(list).then(setPicks).catch(() => {}); }).catch(() => setStores([]));
+    listStores(9).then(list => { setStores(list); listHomeProducts(list).then(setPicks).catch(() => {}); }).catch(err => { console.error('Could not load stores:', err); setStores([]); });
   }, []);
   return (
     <>
@@ -101,6 +136,7 @@ export function Home() {
               </Link>
             ))}</div>
           )}
+          {stores?.length > 0 && <p style={{ marginTop: 20 }}><Link className="link-btn" to="/stores">View all stores <ArrowRight size={14}/></Link></p>}
         </div>
       </section>
 

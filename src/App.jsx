@@ -1,7 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { SiteLayout, DashboardLayout } from './components/Layout.jsx';
 import { RequireAuth } from './components/common.jsx';
-import { Home, Storefront, ProductDetail, Cart, Checkout, OrderStatus } from './pages/Pages.jsx';
+import { Home, AllStores, Storefront, ProductDetail, Cart, Checkout, OrderStatus } from './pages/Pages.jsx';
 import { AuthPage, ForgotPassword, SetupStore } from './pages/AuthPages.jsx';
 import { Account, Admin } from './pages/Account.jsx';
 import { Analytics, Customers, DashboardData, Inventory, Orders, Overview, Products, StoreSettings } from './pages/Dashboard.jsx';
@@ -11,6 +11,7 @@ export default function App() {
     <Routes>
       <Route element={<SiteLayout/>}>
         <Route path="/" element={<Home/>}/>
+        <Route path="/stores" element={<AllStores/>}/>
         <Route path="/store/:storeSlug" element={<Storefront/>}/>
         <Route path="/store/:storeSlug/product/:productId" element={<ProductDetail/>}/>
         <Route path="/store/:storeSlug/cart" element={<Cart/>}/>
