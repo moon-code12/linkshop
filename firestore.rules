@@ -25,8 +25,14 @@ service cloud.firestore {
 
     match /stores/{storeId} {
       allow read: if true;
-      allow create: if ownsStore(storeId) && request.resource.data.ownerId == request.auth.uid && userDoc().role == 'seller';
-      allow update: if ownsStore(storeId) && request.resource.data.ownerId == resource.data.ownerId;
+      allow create: if ownsStore(storeId) && request.resource.data.ownerId == request.auth.uid && userDoc().role == 'seller'
+        && !('plan' in request.resource.data) && !('planUpdatedAt' in request.resource.data);
+      // Sellers can't change their own plan; only an admin can (see the next rule).
+      allow update: if ownsStore(storeId) && request.resource.data.ownerId == resource.data.ownerId
+        && request.resource.data.get('plan', null) == resource.data.get('plan', null)
+        && request.resource.data.get('planUpdatedAt', null) == resource.data.get('planUpdatedAt', null);
+      allow update: if isAdmin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['plan', 'planUpdatedAt'])
+        && request.resource.data.plan in ['free', 'growth', 'pro'];
       allow delete: if ownsStore(storeId);
 
       match /products/{productId} {

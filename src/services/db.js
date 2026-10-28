@@ -178,6 +178,21 @@ export async function updateOrderStatus(order, next) {
     tx.update(orderRef, { status: next, ...paymentUpdate });
   });
 }
+/* ---------- plans and commission ---------- */
+// Pricing is a demo until real payments are connected: fees are tracked here, not charged.
+export const PLANS = {
+  free: { name: 'Free', monthly: 0, commission: 0.05 },
+  growth: { name: 'Growth', monthly: 5000, commission: 0.03 },
+  pro: { name: 'Pro', monthly: 15000, commission: 0.015 },
+};
+export const planOf = store => PLANS[store?.plan] ? store.plan : 'free';
+// Commission is taken on the goods value (delivery is excluded) of orders that aren't cancelled.
+export const commissionFor = (store, order) =>
+  order.status === 'cancelled' ? 0 : Math.round((order.subtotal ?? order.total) * PLANS[planOf(store)].commission);
+export async function setStorePlan(storeId, plan) {
+  if (!PLANS[plan]) throw new Error('Unknown plan.');
+  await updateDoc(doc(db, 'stores', storeId), { plan, planUpdatedAt: serverTimestamp() });
+}
 export async function listAllOrders() {
   const snap = await getDocs(query(collection(db, 'orders'), orderBy('createdAt', 'desc'), limit(200)));
   return snap.docs.map(withId);
